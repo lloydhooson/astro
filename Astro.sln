@@ -1,0 +1,32 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2015
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Astro.CSharp.Plugins", "Astro.CSharp.Plugins.csproj", "{55321155-58A5-DDEF-BD80-86CBA0A2CFA9}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Astro.CSharp", "Astro.CSharp.csproj", "{48C5FE56-39FB-32FF-E56C-17A6F4DF929D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Astro.CSharp.Editor", "Astro.CSharp.Editor.csproj", "{5BC3C9F8-7C82-9BBA-91BB-C3E621B90664}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{55321155-58A5-DDEF-BD80-86CBA0A2CFA9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{55321155-58A5-DDEF-BD80-86CBA0A2CFA9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{55321155-58A5-DDEF-BD80-86CBA0A2CFA9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{55321155-58A5-DDEF-BD80-86CBA0A2CFA9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{48C5FE56-39FB-32FF-E56C-17A6F4DF929D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{48C5FE56-39FB-32FF-E56C-17A6F4DF929D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{48C5FE56-39FB-32FF-E56C-17A6F4DF929D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{48C5FE56-39FB-32FF-E56C-17A6F4DF929D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5BC3C9F8-7C82-9BBA-91BB-C3E621B90664}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5BC3C9F8-7C82-9BBA-91BB-C3E621B90664}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5BC3C9F8-7C82-9BBA-91BB-C3E621B90664}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5BC3C9F8-7C82-9BBA-91BB-C3E621B90664}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
