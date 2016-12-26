@@ -2,20 +2,27 @@
 
 public class Chunk
 {
+    //--Main Stuff--
     public GameObject obj;
     public Vector3 pos;
     public float[] field;
 
+    //--Planet Ref--
     private Planet planet;
+
+    //--Triangulation--
     private MarchingCubes marchingCubes;
 
+    //--Mesh--
     private Mesh m;
     private MeshFilter mf;
     private MeshRenderer mr;
     private MeshCollider mc;
 
+    //--Private Stuff
     private int num, size, realSize;
 
+    //--Constructor--
     public Chunk(Planet planet, string name, Vector3 pos, Transform par, int num, int size, Material mat, int layerMask)
     {
         obj = new GameObject(name, typeof(MeshFilter), typeof(MeshRenderer), typeof(MeshCollider));
@@ -43,7 +50,8 @@ public class Chunk
         this.size = size;
     }
 
-    public void Build()
+    //--Public Methods--
+    public void Generate()
     {
         planet.GenerateEmptySurface(field, pos);
 
@@ -53,7 +61,14 @@ public class Chunk
         mf.sharedMesh = m;
         mc.sharedMesh = m;
     }
+    public void Build()
+    {
+        m = marchingCubes.CreateMesh(field);
+        m.RecalculateNormals();
 
+        mf.sharedMesh = m;
+        mc.sharedMesh = m;
+    }
     public void Debug()
     {
         Vector3 p = new Vector3(pos.x + size / 2, pos.y + size / 2, pos.z + size / 2);
