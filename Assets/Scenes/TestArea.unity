@@ -90,6 +90,12 @@ NavMeshSettings:
     cellSize: 0.16666667
     manualCellSize: 0
   m_NavMeshData: {fileID: 0}
+--- !u!114 &88829972 stripped
+MonoBehaviour:
+  m_PrefabParentObject: {fileID: 114000010270219484, guid: 9fb3025d1a9ca4244bb3d182a05c4ecb,
+    type: 2}
+  m_PrefabInternal: {fileID: 1321043370}
+  m_Script: {fileID: 11500000, guid: 758bef0f032cb4c449469b2386c49260, type: 3}
 --- !u!1001 &319517922
 Prefab:
   m_ObjectHideFlags: 0
@@ -99,15 +105,15 @@ Prefab:
     m_Modifications:
     - target: {fileID: 4000013180089520, guid: 3cec4c449300d3f4a8fd39aacd0dacd3, type: 2}
       propertyPath: m_LocalPosition.x
-      value: 80
+      value: 112
       objectReference: {fileID: 0}
     - target: {fileID: 4000013180089520, guid: 3cec4c449300d3f4a8fd39aacd0dacd3, type: 2}
       propertyPath: m_LocalPosition.y
-      value: 170
+      value: 224
       objectReference: {fileID: 0}
     - target: {fileID: 4000013180089520, guid: 3cec4c449300d3f4a8fd39aacd0dacd3, type: 2}
       propertyPath: m_LocalPosition.z
-      value: 80
+      value: 112
       objectReference: {fileID: 0}
     - target: {fileID: 4000013180089520, guid: 3cec4c449300d3f4a8fd39aacd0dacd3, type: 2}
       propertyPath: m_LocalRotation.x
@@ -133,7 +139,7 @@ Prefab:
         type: 2}
       propertyPath: planet
       value: 
-      objectReference: {fileID: 1321043371}
+      objectReference: {fileID: 88829972}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: 3cec4c449300d3f4a8fd39aacd0dacd3, type: 2}
   m_IsPrefabParent: 0
@@ -176,20 +182,9 @@ Prefab:
       propertyPath: m_RootOrder
       value: 1
       objectReference: {fileID: 0}
-    - target: {fileID: 114000013263638442, guid: 9fb3025d1a9ca4244bb3d182a05c4ecb,
-        type: 2}
-      propertyPath: m_Enabled
-      value: 1
-      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: 9fb3025d1a9ca4244bb3d182a05c4ecb, type: 2}
   m_IsPrefabParent: 0
---- !u!114 &1321043371 stripped
-MonoBehaviour:
-  m_PrefabParentObject: {fileID: 114000013263638442, guid: 9fb3025d1a9ca4244bb3d182a05c4ecb,
-    type: 2}
-  m_PrefabInternal: {fileID: 1321043370}
-  m_Script: {fileID: 11500000, guid: 758bef0f032cb4c449469b2386c49260, type: 3}
 --- !u!1 &1853962723
 GameObject:
   m_ObjectHideFlags: 0

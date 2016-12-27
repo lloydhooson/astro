@@ -60059,9 +60059,9 @@ MonoBehaviour:
   layerMask: 8
   num: 7
   size: 32
-  startHeight: 50
+  startHeight: 80
   seed: Alex
   oct: 4
-  frq: 60
+  frq: 70
   amp: 5
   gravity: -8

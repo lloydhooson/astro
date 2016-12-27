@@ -5,7 +5,7 @@ using UnityEditor;
 public class PlanetInspector : Editor {
 
     private Planet planet;
-    private string file = "Assets/Planets/";
+    private string file = "Assets/Planets/MyAwesomeFile.dat";
 
     public override void OnInspectorGUI()
     {
