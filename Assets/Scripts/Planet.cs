@@ -2,13 +2,18 @@
 
 public class Planet : MonoBehaviour
 {
+    //--Debug--
     public bool debugMode;
     public bool showField, showChunks;
     public bool debugChunks;
 
+    //--Main Stuff--
     public Material mat;
     public int layerMask;
     public int num, size;
+    public int startHeight;
+
+    //--Noise--
     public string seed;
     public int oct;
     public float frq, amp;
@@ -16,10 +21,12 @@ public class Planet : MonoBehaviour
     //--Gravity--
     public float gravity;
 
-    public AnimationCurve globalHeightFunction;
+    //--Chunks--
+    [HideInInspector] public Chunk[] chunks;
 
+    //--Private Stuff--
+    private AnimationCurve globalHeightFunction;
     private Vector3 c;
-    private Chunk[] chunks;
     private PerlinNoise noise;
 
     void Start()
@@ -39,11 +46,21 @@ public class Planet : MonoBehaviour
 
                     chunks[x + y * num + z * num * num] = new Chunk(this, name, pos, transform, num, size, mat, layerMask);
                 }
-
-        foreach (Chunk chunk in chunks)
-            chunk.Build();
     }
 
+    //--Public Methods--
+    public void Generate()
+    {
+        if(chunks != null)
+            foreach (Chunk chunk in chunks)
+                chunk.Generate();
+    }
+    public void Build()
+    {
+        if (chunks != null)
+            foreach (Chunk chunk in chunks)
+                chunk.Build();
+    }
     public void GenerateEmptySurface(float[] field, Vector3 pos)
     {
         int rS = size + 1;
@@ -56,13 +73,13 @@ public class Planet : MonoBehaviour
                     float d = (c - p).magnitude;
                     float t = 1f - 1f / (1f + d);
 
-                    float v = noise.FractalNoise3D(pos.x + x, pos.y + y, pos.z + z, oct, frq, amp);
-                    v = (v < 0) ? 0 : v;
+                    float n = noise.FractalNoise3D(pos.x + x, pos.y + y, pos.z + z, oct, frq, amp);
 
-                    field[x + y * rS + z * rS * rS] = globalHeightFunction.Evaluate(t) - v;
+                    globalHeightFunction = AnimationCurve.Linear(0, startHeight + n, 1, 0);
+
+                    field[x + y * rS + z * rS * rS] = globalHeightFunction.Evaluate(t);
                 }
     }
-
     public void Attract(Rigidbody rb)
     {
         Vector3 gravityUp = (rb.position - c).normalized;
@@ -72,6 +89,7 @@ public class Planet : MonoBehaviour
         rb.rotation = Quaternion.FromToRotation(localUp, gravityUp) * rb.rotation;
     }
 
+    //--Private Methods--
     private int GetSeed()
     {
         return (seed == "") ? Random.Range(int.MinValue, int.MaxValue) : seed.GetHashCode();

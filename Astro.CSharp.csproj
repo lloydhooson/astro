@@ -76,6 +76,8 @@
     <Compile Include="Assets\Scripts\MarchingCubes.cs" />
     <Compile Include="Assets\Scripts\PerlinNoise.cs" />
     <Compile Include="Assets\Scripts\Planet.cs" />
+    <Compile Include="Assets\Scripts\PlanetHelper.cs" />
+    <Compile Include="Assets\Scripts\PlanetInspector.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets\Standard Assets\Characters\FirstPersonCharacter\FirstPersonCharacterGuidelines.txt" />
