@@ -1,4 +1,7 @@
 ﻿using UnityEngine;
+using System.Collections.Generic;
+
+using UniRx;
 
 public class Planet : MonoBehaviour
 {
@@ -60,6 +63,12 @@ public class Planet : MonoBehaviour
         if (chunks != null)
             foreach (Chunk chunk in chunks)
                 chunk.Build();
+    }
+    public void BuildAsync()
+    {
+        if (chunks != null)
+            foreach (Chunk chunk in chunks)
+                chunk.BuildAsync();
     }
     public void GenerateEmptySurface(float[] field, Vector3 pos)
     {

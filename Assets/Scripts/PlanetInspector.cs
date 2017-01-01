@@ -19,11 +19,15 @@ public class PlanetInspector : Editor {
         {
             planet.Generate();
         }
-        if(GUILayout.Button("Build Fields"))
+        if(GUILayout.Button("Build"))
         {
             planet.Build();
         }
-        if(GUILayout.Button("Save Fields"))
+        if (GUILayout.Button("Build Async"))
+        {
+            planet.BuildAsync();
+        }
+        if (GUILayout.Button("Save Fields"))
         {
             PlanetHelper.Save(planet.num, file, planet.chunks);
         }

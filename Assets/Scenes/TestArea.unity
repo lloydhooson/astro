@@ -94,7 +94,7 @@ NavMeshSettings:
 MonoBehaviour:
   m_PrefabParentObject: {fileID: 114000010270219484, guid: 9fb3025d1a9ca4244bb3d182a05c4ecb,
     type: 2}
-  m_PrefabInternal: {fileID: 1321043370}
+  m_PrefabInternal: {fileID: 1458914340}
   m_Script: {fileID: 11500000, guid: 758bef0f032cb4c449469b2386c49260, type: 3}
 --- !u!1001 &319517922
 Prefab:
@@ -143,7 +143,7 @@ Prefab:
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: 3cec4c449300d3f4a8fd39aacd0dacd3, type: 2}
   m_IsPrefabParent: 0
---- !u!1001 &1321043370
+--- !u!1001 &1458914340
 Prefab:
   m_ObjectHideFlags: 0
   serializedVersion: 2
