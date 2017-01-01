@@ -1,35 +1,31 @@
-using UnityEngine;
-using System.Collections.Generic;
-	
+
+
 public class MarchingCubes
 {
-    private Mesh m;
+    public MeshBuffer mb;
 
     private int size, rS;
     private float target;
     private int[] order;
 
-    private List<Vector3> vertBuffer;
-    private List<int> triBuffer;
+    private TVector3[] edgeVertex = new TVector3[12];
 
     public MarchingCubes(int size, float target, int[] order)
     {
-        m = new Mesh();
+        mb = new MeshBuffer();
 
         this.size = size;
         rS = size + 1;
         this.target = target;
         this.order = order;
 
-        vertBuffer = new List<Vector3>();
-        triBuffer = new List<int>();
+        for (int e = 0; e < 12; e++)
+            edgeVertex[e] = new TVector3();
     }
 
-	public Mesh CreateMesh(float[] field)
+	public void CreateMesh(float[] field)
 	{
-        m.Clear();
-        vertBuffer.Clear();
-        triBuffer.Clear();
+        mb.Clear();
 
 		float[] cube = new float[8];
 		
@@ -37,14 +33,9 @@ public class MarchingCubes
 			for(int y = 0; y < size; y++)
 				for(int z = 0; z < size; z++)
 				{
-					FillCube(x, y, z, field, cube);
+                    FillCube(x, y, z, field, cube);
 					MarchCube(x, y, z, cube);
-				}
-
-        m.SetVertices(vertBuffer);
-        m.SetTriangles(triBuffer, 0);   
-		
-		return m;
+                }
 	}
 	
 	void FillCube(int x, int y, int z, float[] field, float[] cube)
@@ -64,10 +55,11 @@ public class MarchingCubes
 		int i, j, vert, idx;
 		int flagIndex = 0;
 		float offset = 0.0f;
-		
-	    Vector3[] edgeVertex = new Vector3[12];
-	
-	    for(i = 0; i < 8; i++)
+
+        for (int e = 0; e < 12; e++)
+            edgeVertex[e] = new TVector3();
+
+        for (i = 0; i < 8; i++)
             if (cube[i] <= target)
                 flagIndex |= 1 << i;
 	
@@ -81,9 +73,9 @@ public class MarchingCubes
 	        {
 	         	offset = GetOffset(cube[edgeConnection[i,0]], cube[edgeConnection[i,1]]);
 	
-                edgeVertex[i].x = x + (vertexOffset[edgeConnection[i,0],0] + offset * edgeDirection[i,0]);
-                edgeVertex[i].y = y + (vertexOffset[edgeConnection[i,0],1] + offset * edgeDirection[i,1]);
-                edgeVertex[i].z = z + (vertexOffset[edgeConnection[i,0],2] + offset * edgeDirection[i,2]);
+                edgeVertex[i].X = x + (vertexOffset[edgeConnection[i,0],0] + offset * edgeDirection[i,0]);
+                edgeVertex[i].Y = y + (vertexOffset[edgeConnection[i,0],1] + offset * edgeDirection[i,1]);
+                edgeVertex[i].Z = z + (vertexOffset[edgeConnection[i,0],2] + offset * edgeDirection[i,2]);
 	        }
 	    }
 	
@@ -92,17 +84,17 @@ public class MarchingCubes
             if(triangleConnectionTable[flagIndex,3*i] < 0)
                 break;
 			
-			idx = vertBuffer.Count;
+			idx = mb.vertices.Count;
 
             for(j = 0; j < 3; j++)
             {
                 vert = triangleConnectionTable[flagIndex,3*i+j];
 
-				triBuffer.Add(idx+ order[j]);
-                vertBuffer.Add(edgeVertex[vert]);
+				mb.triangles.Add(idx+ order[j]);
+                mb.vertices.Add(edgeVertex[vert]);
             }
 	    }
-	}
+    }
 
 	int[,] vertexOffset = new int[,]
 	{

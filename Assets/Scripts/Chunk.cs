@@ -1,4 +1,8 @@
 ﻿using UnityEngine;
+using System;
+using System.Collections.Generic;
+
+using UniRx;
 
 public class Chunk
 {
@@ -14,6 +18,7 @@ public class Chunk
     private MarchingCubes marchingCubes;
 
     //--Mesh--
+    private List<Vector3> vertBuffer;
     private Mesh m;
     private MeshFilter mf;
     private MeshRenderer mr;
@@ -21,6 +26,7 @@ public class Chunk
 
     //--Private Stuff
     private int num, size, realSize;
+    private bool terrainIsReady;
 
     //--Constructor--
     public Chunk(Planet planet, string name, Vector3 pos, Transform par, int num, int size, Material mat, int layerMask)
@@ -36,6 +42,8 @@ public class Chunk
         this.planet = planet;
         marchingCubes = new MarchingCubes(size, 0.5f, new int[] { 0, 1, 2 });
 
+        vertBuffer = new List<Vector3>();
+
         m = new Mesh();
         mf = obj.GetComponent<MeshFilter>();
         mr = obj.GetComponent<MeshRenderer>();
@@ -48,6 +56,8 @@ public class Chunk
 
         this.num = num;
         this.size = size;
+
+        terrainIsReady = false;
     }
 
     //--Public Methods--
@@ -55,7 +65,7 @@ public class Chunk
     {
         planet.GenerateEmptySurface(field, pos);
 
-        m = marchingCubes.CreateMesh(field);
+        //m = marchingCubes.CreateMesh(field);
         m.RecalculateNormals();
 
         mf.sharedMesh = m;
@@ -63,7 +73,51 @@ public class Chunk
     }
     public void Build()
     {
-        m = marchingCubes.CreateMesh(field);
+        marchingCubes.CreateMesh(field);
+
+        vertBuffer.Clear();
+        for (int i = 0; i < marchingCubes.mb.vertices.Count; i++)
+        {
+            TVector3 vert = marchingCubes.mb.vertices[i];
+            vertBuffer.Add(new Vector3(vert.X, vert.Y, vert.Z));
+        }
+
+        m.Clear();
+        m.SetVertices(vertBuffer);
+        m.SetTriangles(marchingCubes.mb.triangles, 0);
+        m.RecalculateNormals();
+
+        mf.sharedMesh = m;
+        mc.sharedMesh = m;
+    }
+    public void BuildAsync()
+    {
+        var msa = Observable.Start(() =>
+        {
+            marchingCubes.CreateMesh(field);
+
+            System.Threading.Thread.Sleep(TimeSpan.FromSeconds(10));
+            return 5;
+        });
+
+        Observable.WhenAll(msa).ObserveOnMainThread().Subscribe(x =>
+        {
+            ConvertMesh();
+            terrainIsReady = true;
+        });
+    }
+    public void ConvertMesh()
+    {
+        vertBuffer.Clear();
+        for(int i = 0; i < marchingCubes.mb.vertices.Count; i++)
+        {
+            TVector3 vert = marchingCubes.mb.vertices[i];
+            vertBuffer.Add(new Vector3(vert.X, vert.Y, vert.Z));
+        }
+
+        m.Clear();
+        m.SetVertices(vertBuffer);
+        m.SetTriangles(marchingCubes.mb.triangles, 0);
         m.RecalculateNormals();
 
         mf.sharedMesh = m;
@@ -74,6 +128,7 @@ public class Chunk
         Vector3 p = new Vector3(pos.x + size / 2, pos.y + size / 2, pos.z + size / 2);
         Vector3 s = new Vector3(size, size, size);
 
-        Gizmos.DrawWireCube(p, s);
+        if(terrainIsReady)
+            Gizmos.DrawWireCube(p, s);
     }
 }
