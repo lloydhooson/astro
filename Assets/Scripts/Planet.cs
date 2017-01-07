@@ -9,8 +9,10 @@ public class Planet : MonoBehaviour
     public bool debugMode;
     public bool showField, showChunks;
     public bool debugChunks;
+    public bool debugCache;
 
     //--Main Stuff--
+    public Transform player;
     public Material mat;
     public int layerMask;
     public int num, size;
@@ -25,7 +27,13 @@ public class Planet : MonoBehaviour
     public float gravity;
 
     //--Chunks--
-    [HideInInspector] public Chunk[] chunks;
+    public Chunk[] chunks;
+    public List<Chunk> chunkCache;
+
+    //--Cache--
+    public int radius;
+    private Vector3 worldPos;
+    private HashSet<Vector3> nearChunkLocations;
 
     //--Private Stuff--
     private AnimationCurve globalHeightFunction;
@@ -38,6 +46,7 @@ public class Planet : MonoBehaviour
         c = new Vector3(m, m, m);
 
         chunks = new Chunk[num * num * num];
+        chunkCache = new List<Chunk>();
         noise = new PerlinNoise(GetSeed());
 
         for (int x = 0; x < num; x++)
@@ -49,6 +58,50 @@ public class Planet : MonoBehaviour
 
                     chunks[x + y * num + z * num * num] = new Chunk(this, name, pos, transform, num, size, mat, layerMask);
                 }
+
+        worldPos = GetTargetPosition(player.position);
+        nearChunkLocations = new HashSet<Vector3>();
+    }
+
+    void Update()
+    {
+        Vector3 p = player.position;
+        bool moveFlag = false;
+
+        if      (p.x < worldPos.x)
+            moveFlag = true;
+        else if (p.x > worldPos.x + size)
+            moveFlag = true;
+        else if (p.y < worldPos.y)
+            moveFlag = true;
+        else if (p.y > worldPos.y + size)
+            moveFlag = true;
+        else if (p.z < worldPos.z)
+            moveFlag = true;
+        else if (p.z > worldPos.z + size)
+            moveFlag = true;
+
+        if(moveFlag)
+        {
+            worldPos = GetTargetPosition(player.position);
+            nearChunkLocations = GetPositionsInRadius();
+
+            chunkCache.Clear();
+
+            foreach(Vector3 pos in nearChunkLocations)
+            {
+                int x = (int)(pos.x / size);
+                int y = (int)(pos.y / size);
+                int z = (int)(pos.z / size);
+
+                if (x != 0) x -= 1;
+                if (y != 0) y -= 1;
+                if (z != 0) z -= 1;
+
+                if (x >= 0 && y >= 0 && z >= 0 && x < num - 1 && y < num - 1 && z < num - 1)
+                    chunkCache.Add(chunks[x + y * num + z * num * num]);
+            }
+        }
     }
 
     //--Public Methods--
@@ -103,11 +156,44 @@ public class Planet : MonoBehaviour
     {
         return (seed == "") ? Random.Range(int.MinValue, int.MaxValue) : seed.GetHashCode();
     }
+    private Vector3 GetTargetPosition(Vector3 pos)
+    {
+        int x = (int)Mathf.Floor(pos.x / size) * size;
+        int y = (int)Mathf.Floor(pos.y / size) * size;
+        int z = (int)Mathf.Floor(pos.z / size) * size;
+
+        return new Vector3(x, y, z);
+    }
+    private HashSet<Vector3> GetPositionsInRadius()
+    {
+        HashSet<Vector3> results = new HashSet<Vector3>();
+
+        for (int x = -radius; x <= radius; x++)
+            for (int y = -radius; y <= radius; y++)
+                for (int z = -radius; z <= radius; z++)
+                    if (x * x + y * y + z * z < radius * radius)
+                        results.Add(new Vector3(worldPos.x + (x * size), worldPos.y + (y * size), worldPos.z + (z * size)));
+
+        return results;
+    }
 
     void OnDrawGizmos()
     {
         if (!debugMode)
             return;
+
+        if(debugCache && nearChunkLocations != null)
+        {
+            Gizmos.color = Color.green;
+
+            foreach(Vector3 pos in nearChunkLocations)
+            {
+                Vector3 pR = pos + new Vector3(size / 2, size / 2, size / 2);
+                Vector3 sR = new Vector3(size, size, size);
+
+                Gizmos.DrawWireCube(pR, sR);
+            }
+        }
 
         if(showField)
         {

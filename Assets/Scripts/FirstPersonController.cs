@@ -21,15 +21,18 @@ public class FirstPersonController : MonoBehaviour
 	
 	void Start()
     {
-		Cursor.lockState = CursorLockMode.Locked;
-		Cursor.visible = false;
-
 		cameraTransform = Camera.main.transform;
 		rigidbody = GetComponent<Rigidbody> ();
 	}
 	
 	void Update()
     {
+        if(Input.GetKeyDown(KeyCode.L))
+        {
+            Cursor.lockState = CursorLockMode.Locked;
+            Cursor.visible = false;
+        }
+
 		transform.Rotate(Vector3.up * Input.GetAxis("Mouse X") * mouseSensitivityX);
 		verticalLookRotation += Input.GetAxis("Mouse Y") * mouseSensitivityY;
 		verticalLookRotation = Mathf.Clamp(verticalLookRotation,-90,90);

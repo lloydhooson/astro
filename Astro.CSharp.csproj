@@ -80,6 +80,7 @@
     <Compile Include="Assets\Scripts\PlanetHelper.cs" />
     <Compile Include="Assets\Scripts\PlanetInspector.cs" />
     <Compile Include="Assets\Scripts\TVector3.cs" />
+    <Compile Include="Assets\Scripts\Tool.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets\Plugins\UniRx\ReadMe.txt" />
