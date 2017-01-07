@@ -23,6 +23,7 @@ GameObject:
   - 136: {fileID: 136000014031164936}
   - 114: {fileID: 114000010148943040}
   - 114: {fileID: 114000013187289398}
+  - 114: {fileID: 114000013092958046}
   m_Layer: 0
   m_Name: Player
   m_TagString: Untagged
@@ -137,12 +138,47 @@ MonoBehaviour:
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1000010306275640}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: de89fdb9522f6994da8651e48b6134d5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   planet: {fileID: 0}
+--- !u!114 &114000013092958046
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1000010306275640}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 816467e3abb4cb142b8456a6fcaecb9e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  planet: {fileID: 0}
+  mask:
+    serializedVersion: 2
+    m_Bits: 256
+  size: 16
+  distance: 15
+  range: 3
+  strenght: 0.01
+  brush:
+    serializedVersion: 2
+    m_Curve:
+    - time: 0
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+    - time: 1
+      value: 0
+      inSlope: 0.02303457
+      outSlope: 0.02303457
+      tangentMode: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 0
 --- !u!114 &114000013187289398
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -156,8 +192,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   mouseSensitivityX: 1
   mouseSensitivityY: 1
-  walkSpeed: 6
-  jumpForce: 220
+  walkSpeed: 20
+  jumpForce: 1000
   groundedMask:
     serializedVersion: 2
     m_Bits: 256
