@@ -6,10 +6,15 @@ using UniRx;
 
 public class Chunk
 {
-    //--Main Stuff--
+    //--Obj Ref--
     public GameObject obj;
-    public Vector3 pos;
+
+    //--Scalar Field--
+    public bool performTriangulation;
     public float[] field;
+
+    //--Neighbour Chunks--
+    public List<Chunk> neighbourChunks;
 
     //--Planet Ref--
     private Planet planet;
@@ -26,17 +31,19 @@ public class Chunk
 
     //--Private Stuff
     private int num, size, realSize;
-    private bool terrainIsReady;
+    public int x, y, z;
 
     //--Constructor--
-    public Chunk(Planet planet, string name, Vector3 pos, Transform par, int num, int size, Material mat, int layerMask)
+    public Chunk(Planet planet, Transform par, int num, int size, int x, int y, int z, Material mat, int layerMask)
     {
-        obj = new GameObject(name, typeof(MeshFilter), typeof(MeshRenderer), typeof(MeshCollider));
-        obj.transform.position = pos;
+        obj = new GameObject(string.Format("{0} / {1} / {2}", x, y, z), typeof(MeshFilter), typeof(MeshRenderer), typeof(MeshCollider));
+        obj.transform.position = new Vector3(x * size, y * size, z * size);
         obj.transform.parent = par;
         obj.layer = layerMask;
 
-        this.pos = pos;
+        neighbourChunks = new List<Chunk>();
+
+        performTriangulation = true;
         field = new float[(size + 1) * (size + 1) * (size + 1)];
 
         this.planet = planet;
@@ -57,22 +64,38 @@ public class Chunk
         this.num = num;
         this.size = size;
 
-        terrainIsReady = false;
+        this.x = x;
+        this.y = y;
+        this.z = z;
     }
 
     //--Public Methods--
+    public void SetNeighbourChunks()
+    {
+        for (int ix = x - 1; ix <= x + 1; ix++)
+            for (int iy = y - 1; iy <= y + 1; iy++)
+                for (int iz = z - 1; iz <= z + 1; iz++)
+                    if (ix >= 0 && iy >= 0 && iz >= 0 && ix < num && iy < num && iz < num)
+                        neighbourChunks.Add(planet.chunks[ix + iy * num + iz * num * num]);
+    }
+    public Vector3 GetPosition()
+    {
+        return new Vector3(x * size, y * size, z * size);
+    }
+    public Vector3 GetCenter()
+    {
+        return new Vector3(x * size + (size / 2), y * size + size / 2, z * size + size / 2);
+    }
     public void Generate()
     {
-        planet.GenerateEmptySurface(field, pos);
-
-        //m = marchingCubes.CreateMesh(field);
-        m.RecalculateNormals();
-
-        mf.sharedMesh = m;
-        mc.sharedMesh = m;
+        field = new float[(size + 1) * (size + 1) * (size + 1)];
+        planet.GenerateEmptySurface(this);
     }
     public void Build()
     {
+        if (!performTriangulation)
+            return;
+
         marchingCubes.CreateMesh(field);
 
         vertBuffer.Clear();
@@ -92,18 +115,20 @@ public class Chunk
     }
     public void BuildAsync()
     {
+        if (!performTriangulation)
+            return;
+
         var msa = Observable.Start(() =>
         {
             marchingCubes.CreateMesh(field);
 
-            System.Threading.Thread.Sleep(TimeSpan.FromSeconds(10));
+            System.Threading.Thread.Sleep(TimeSpan.FromSeconds(5));
             return 5;
         });
 
         Observable.WhenAll(msa).ObserveOnMainThread().Subscribe(x =>
         {
             ConvertMesh();
-            terrainIsReady = true;
         });
     }
     public void ConvertMesh()
@@ -125,10 +150,10 @@ public class Chunk
     }
     public void Debug()
     {
-        Vector3 p = new Vector3(pos.x + size / 2, pos.y + size / 2, pos.z + size / 2);
+        Vector3 p = new Vector3(x * size + size / 2, y * size + size / 2, z * size + size / 2);
         Vector3 s = new Vector3(size, size, size);
 
-        if(terrainIsReady)
+        if(performTriangulation)
             Gizmos.DrawWireCube(p, s);
     }
 }

@@ -22,15 +22,15 @@ GameObject:
   - 54: {fileID: 54000011933080676}
   - 136: {fileID: 136000014031164936}
   - 114: {fileID: 114000010148943040}
-  - 114: {fileID: 114000013187289398}
-  - 114: {fileID: 114000013092958046}
+  - 114: {fileID: 114000011480183156}
+  - 114: {fileID: 114000011187234838}
   m_Layer: 0
   m_Name: Player
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!1 &1000012848794816
 GameObject:
   m_ObjectHideFlags: 0
@@ -69,7 +69,7 @@ Transform:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1000010306275640}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 112, y: 224, z: 112}
+  m_LocalPosition: {x: 187.5, y: 375, z: 187.5}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_Children:
@@ -84,8 +84,8 @@ Camera:
   m_GameObject: {fileID: 1000012848794816}
   m_Enabled: 1
   serializedVersion: 2
-  m_ClearFlags: 1
-  m_BackGroundColor: {r: 0.19215687, g: 0.3019608, b: 0.4745098, a: 0.019607844}
+  m_ClearFlags: 2
+  m_BackGroundColor: {r: 0, g: 0.07148692, b: 0.18382353, a: 0.019607844}
   m_NormalizedViewPortRect:
     serializedVersion: 2
     x: 0
@@ -140,11 +140,11 @@ MonoBehaviour:
   m_GameObject: {fileID: 1000010306275640}
   m_Enabled: 0
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: de89fdb9522f6994da8651e48b6134d5, type: 3}
+  m_Script: {fileID: 11500000, guid: 2868ec4b545005c4c8a405822370c0f6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   planet: {fileID: 0}
---- !u!114 &114000013092958046
+--- !u!114 &114000011187234838
 MonoBehaviour:
   m_ObjectHideFlags: 1
   m_PrefabParentObject: {fileID: 0}
@@ -152,15 +152,15 @@ MonoBehaviour:
   m_GameObject: {fileID: 1000010306275640}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 816467e3abb4cb142b8456a6fcaecb9e, type: 3}
+  m_Script: {fileID: 11500000, guid: 2bb6635042a2d074bb9628becbc2de6e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   planet: {fileID: 0}
   mask:
     serializedVersion: 2
     m_Bits: 256
-  size: 16
-  distance: 15
+  size: 15
+  distance: 30
   range: 3
   strenght: 0.01
   brush:
@@ -173,13 +173,13 @@ MonoBehaviour:
       tangentMode: 0
     - time: 1
       value: 0
-      inSlope: 0.02303457
-      outSlope: 0.02303457
+      inSlope: -3.209479
+      outSlope: -3.209479
       tangentMode: 0
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 0
---- !u!114 &114000013187289398
+--- !u!114 &114000011480183156
 MonoBehaviour:
   m_ObjectHideFlags: 1
   m_PrefabParentObject: {fileID: 0}
@@ -187,13 +187,13 @@ MonoBehaviour:
   m_GameObject: {fileID: 1000010306275640}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 199b7f74c568fd94b9b719146fcfd945, type: 3}
+  m_Script: {fileID: 11500000, guid: 88e16eb8280d5f944a8354258790b254, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   mouseSensitivityX: 1
   mouseSensitivityY: 1
   walkSpeed: 20
-  jumpForce: 1000
+  jumpForce: 1500
   groundedMask:
     serializedVersion: 2
     m_Bits: 256
