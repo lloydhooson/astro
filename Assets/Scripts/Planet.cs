@@ -1,7 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
-
-using UniRx;
+using System.Diagnostics;
 
 public class Planet : MonoBehaviour
 {
@@ -11,56 +10,79 @@ public class Planet : MonoBehaviour
     public bool debugChunks;
     public bool debugCache;
 
+    //--Main Switches--
+    public bool enableFog;
+
     //--Main Stuff--
-    public Transform player;
+    public Transform player, fog;
     public Material mat;
     public int layerMask;
     public int num, size;
+    private int rS;
     public int startHeight;
+    private AnimationCurve globalHeightFunction;
+    private Vector3 c;
 
     //--Noise--
+    public NOISETYPE noiseType;
+    public enum NOISETYPE { FRACTAL, TURBULENT, RIDGEDMULTIFRACTAL };
+    public ComputeShader noiseComputer;
+    private ComputeBuffer noiseComputeBuffer;
+    private float[] noiseBuffer;
+    private PerlinNoise noise;
     public string seed;
-    public int oct;
-    public float frq, amp;
+    public float frequency, lacunarity, gain, amplitude;
 
     //--Gravity--
     public float gravity;
 
     //--Chunks--
     public Chunk[] chunks;
-    public List<Chunk> chunkCache;
 
     //--Cache--
     public int radius;
     private Vector3 worldPos;
     private HashSet<Vector3> nearChunkLocations;
 
-    //--Private Stuff--
-    private AnimationCurve globalHeightFunction;
-    private Vector3 c;
-    private PerlinNoise noise;
+    //--Diagnostics--
+    private Stopwatch watch;
 
     void Start()
     {
+        rS = size + 1;
+
         int m = (num / 2) * size + (size / 2);
         c = new Vector3(m, m, m);
 
-        chunks = new Chunk[num * num * num];
-        chunkCache = new List<Chunk>();
-        noise = new PerlinNoise(GetSeed());
+        if(enableFog)
+        {
+            fog.position = c;
+            fog.localScale = new Vector3(num * size, num * size, num * size);
+        }
 
+        chunks = new Chunk[num * num * num];
+
+        noise = new PerlinNoise(GetSeed());
+        noise.LoadResourcesFor3DNoise();
+
+        noiseBuffer = new float[rS * rS * rS];
+
+        //Create Chunks
         for (int x = 0; x < num; x++)
             for (int y = 0; y < num; y++)
                 for (int z = 0; z < num; z++)
-                {
-                    string name = string.Format("{0} / {1} / {2}", x, y, z);
-                    Vector3 pos = new Vector3(x * size, y * size, z * size);
+                    chunks[x + y * num + z * num * num] = new Chunk(this, transform, num, size, x, y, z, mat, layerMask);
 
-                    chunks[x + y * num + z * num * num] = new Chunk(this, name, pos, transform, num, size, mat, layerMask);
-                }
+        //Setup Chunks
+        for (int x = 0; x < num; x++)
+            for (int y = 0; y < num; y++)
+                for (int z = 0; z < num; z++)
+                    chunks[x + y * num + z * num * num].SetNeighbourChunks();
 
         worldPos = GetTargetPosition(player.position);
         nearChunkLocations = new HashSet<Vector3>();
+
+        watch = new Stopwatch();
     }
 
     void Update()
@@ -85,37 +107,33 @@ public class Planet : MonoBehaviour
         {
             worldPos = GetTargetPosition(player.position);
             nearChunkLocations = GetPositionsInRadius();
-
-            chunkCache.Clear();
-
-            foreach(Vector3 pos in nearChunkLocations)
-            {
-                int x = (int)(pos.x / size);
-                int y = (int)(pos.y / size);
-                int z = (int)(pos.z / size);
-
-                if (x != 0) x -= 1;
-                if (y != 0) y -= 1;
-                if (z != 0) z -= 1;
-
-                if (x >= 0 && y >= 0 && z >= 0 && x < num - 1 && y < num - 1 && z < num - 1)
-                    chunkCache.Add(chunks[x + y * num + z * num * num]);
-            }
         }
     }
 
     //--Public Methods--
     public void Generate()
     {
+        watch.Start();
+
         if(chunks != null)
             foreach (Chunk chunk in chunks)
                 chunk.Generate();
+
+        watch.Stop();
+        UnityEngine.Debug.Log(string.Format("Noise Generation: {0}ms", watch.ElapsedMilliseconds));
+        watch.Reset();
     }
     public void Build()
     {
+        watch.Start();
+
         if (chunks != null)
             foreach (Chunk chunk in chunks)
                 chunk.Build();
+
+        watch.Stop();
+        UnityEngine.Debug.Log(string.Format("Triangulation: {0}ms", watch.ElapsedMilliseconds));
+        watch.Reset();
     }
     public void BuildAsync()
     {
@@ -123,24 +141,51 @@ public class Planet : MonoBehaviour
             foreach (Chunk chunk in chunks)
                 chunk.BuildAsync();
     }
-    public void GenerateEmptySurface(float[] field, Vector3 pos)
+    public void GenerateEmptySurface(Chunk chunk)
     {
-        int rS = size + 1;
+        noiseComputeBuffer = new ComputeBuffer(rS * rS * rS, sizeof(float));
+
+        noiseComputer.SetInt("_Width", rS);
+        noiseComputer.SetInt("_Height", rS);
+        noiseComputer.SetInt("_Xoff", chunk.x * size);
+        noiseComputer.SetInt("_Yoff", chunk.y * size);
+        noiseComputer.SetInt("_Zoff", chunk.z * size);
+        noiseComputer.SetInt("_NoiseType", GetNoiseType());
+        noiseComputer.SetFloat("_Frequency", frequency);
+        noiseComputer.SetFloat("_Lacunarity", lacunarity);
+        noiseComputer.SetFloat("_Gain", gain);
+        noiseComputer.SetTexture(0, "_PermTable", noise.GetPermutationTable2D());
+        noiseComputer.SetTexture(0, "_Gradient", noise.GetGradient3D());
+        noiseComputer.SetBuffer(0, "_Result", noiseComputeBuffer);
+
+        noiseComputer.Dispatch(0, rS / 8, rS / 8, rS / 8);
+        noiseComputeBuffer.GetData(noiseBuffer);
+        noiseComputeBuffer.Release();
+
+        bool hasValuesAboveBorder = false;
+        bool hasValuesBelowBorder = false;
 
         for (int x = 0; x < rS; x++)
             for (int y = 0; y < rS; y++)
                 for (int z = 0; z < rS; z++)
                 {
-                    Vector3 p = pos + new Vector3(x, y, z);
+                    Vector3 p = chunk.GetPosition() + new Vector3(x, y, z);
                     float d = (c - p).magnitude;
                     float t = 1f - 1f / (1f + d);
 
-                    float n = noise.FractalNoise3D(pos.x + x, pos.y + y, pos.z + z, oct, frq, amp);
-
+                    float n = noiseBuffer[x + y * rS + z * rS * rS] * amplitude;
                     globalHeightFunction = AnimationCurve.Linear(0, startHeight + n, 1, 0);
+                    float vol = globalHeightFunction.Evaluate(t);
 
-                    field[x + y * rS + z * rS * rS] = globalHeightFunction.Evaluate(t);
+                    if (vol >= 0.5)
+                        hasValuesAboveBorder = true;
+                    else
+                        hasValuesBelowBorder = true;
+
+                    chunk.field[x + y * rS + z * rS * rS] = vol;
                 }
+
+        chunk.performTriangulation = (hasValuesAboveBorder && hasValuesBelowBorder);
     }
     public void Attract(Rigidbody rb)
     {
@@ -150,11 +195,29 @@ public class Planet : MonoBehaviour
         rb.AddForce(gravityUp * gravity);
         rb.rotation = Quaternion.FromToRotation(localUp, gravityUp) * rb.rotation;
     }
+    public Chunk GetChunkByGameObject(GameObject obj)
+    {
+        foreach (Chunk chunk in chunks)
+            if (chunk.obj.Equals(obj))
+                return chunk;
+
+        return null;
+    }
 
     //--Private Methods--
     private int GetSeed()
     {
         return (seed == "") ? Random.Range(int.MinValue, int.MaxValue) : seed.GetHashCode();
+    }
+    private int GetNoiseType()
+    {
+        switch(noiseType)
+        {
+            case NOISETYPE.FRACTAL: return 0;
+            case NOISETYPE.TURBULENT: return 1;
+            case NOISETYPE.RIDGEDMULTIFRACTAL: return 2;
+            default: return 0;
+        }
     }
     private Vector3 GetTargetPosition(Vector3 pos)
     {

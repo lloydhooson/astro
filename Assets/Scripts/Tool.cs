@@ -13,7 +13,8 @@ public class Tool : MonoBehaviour
     public float strenght;
     public AnimationCurve brush;
 
-    //--Private Stuff--
+    //--Other Stuff--
+    private Chunk sourceChunk;
     private int rS;
 
     void Start()
@@ -30,27 +31,43 @@ public class Tool : MonoBehaviour
             RaycastHit hit;
 
             if(Physics.Raycast(ray, out hit, Mathf.Infinity, mask))
-                if(planet.chunkCache != null)
-                    foreach(Chunk chunk in planet.chunkCache)
-                    {
-                        float deltaChunk = ((chunk.pos + new Vector3(size / 2, size / 2, size / 2)) - hit.point).magnitude;
+            {
+                sourceChunk = planet.GetChunkByGameObject(hit.transform.gameObject);
 
-                        if(deltaChunk < size)
+                if(sourceChunk != null)
+                {
+                    foreach (Chunk chunk in sourceChunk.neighbourChunks)
+                    {
+                        float deltaChunk = (chunk.GetCenter() - hit.point).magnitude;
+
+                        if (deltaChunk < size)
                         {
-                            for(int x = 0; x < rS; x++)
-                                for(int y = 0; y < rS; y++)
-                                    for(int z = 0; z < rS; z++)
+                            bool performTriangulation = false;
+
+                            for (int x = 0; x < rS; x++)
+                                for (int y = 0; y < rS; y++)
+                                    for (int z = 0; z < rS; z++)
                                     {
-                                        float deltaField = ((chunk.pos + new Vector3(x, y, z)) - hit.point).magnitude;
+                                        float deltaField = ((chunk.GetPosition() + new Vector3(x, y, z)) - hit.point).magnitude;
                                         float t = 1f - 1f / (1f + deltaField);
+                                        float vol = brush.Evaluate(t) * strenght;
+
 
                                         if (deltaField < range)
-                                            chunk.field[x + y * rS + z * rS * rS] += brush.Evaluate(t) * strenght;
+                                        {
+                                            chunk.field[x + y * rS + z * rS * rS] += vol;
+
+                                            if (chunk.field[x + y * rS + z * rS * rS] >= 0.5f)
+                                                performTriangulation = true;
+                                        }
                                     }
 
+                            chunk.performTriangulation = performTriangulation;
                             chunk.Build();
                         }
                     }
+                }
+            }
         }
 
         //Subtract Terrain
@@ -60,27 +77,45 @@ public class Tool : MonoBehaviour
             RaycastHit hit;
 
             if (Physics.Raycast(ray, out hit, Mathf.Infinity, mask))
-                if (planet.chunkCache != null)
-                    foreach (Chunk chunk in planet.chunkCache)
+            {
+                sourceChunk = planet.GetChunkByGameObject(hit.transform.gameObject);
+
+                if (sourceChunk != null)
+                {
+                    foreach (Chunk chunk in sourceChunk.neighbourChunks)
                     {
-                        float deltaChunk = ((chunk.pos + new Vector3(size / 2, size / 2, size / 2)) - hit.point).magnitude;
+                        float deltaChunk = (chunk.GetCenter() - hit.point).magnitude;
 
                         if (deltaChunk < size)
                         {
+                            bool performTriangulation = false;
+
                             for (int x = 0; x < rS; x++)
                                 for (int y = 0; y < rS; y++)
                                     for (int z = 0; z < rS; z++)
                                     {
-                                        float deltaField = ((chunk.pos + new Vector3(x, y, z)) - hit.point).magnitude;
+                                        float deltaField = ((chunk.GetPosition() + new Vector3(x, y, z)) - hit.point).magnitude;
                                         float t = 1f - 1f / (1f + deltaField);
+                                        float vol = brush.Evaluate(t) * strenght;
 
                                         if (deltaField < range)
-                                            chunk.field[x + y * rS + z * rS * rS] -= brush.Evaluate(t) * strenght;
+                                        {
+                                            chunk.field[x + y * rS + z * rS * rS] -= vol;
+
+                                            if (chunk.field[x + y * rS + z * rS * rS] >= 0.5f)
+                                                performTriangulation = true;
+                                        }
                                     }
 
+                            chunk.performTriangulation = performTriangulation;
                             chunk.Build();
                         }
                     }
+                }
+            }
         }
+
+        if (Input.GetMouseButtonUp(0) || Input.GetMouseButtonUp(1))
+            sourceChunk = null;
     }
 }

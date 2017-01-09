@@ -13,7 +13,7 @@ public class PlanetHelper
 
         foreach(Chunk chunk in chunks)
         {
-            int idx = (int)chunk.pos.x + (int)chunk.pos.y * globalSize + (int)chunk.pos.z * globalSize * globalSize;
+            int idx = chunk.x + chunk.y * globalSize + chunk.z * globalSize * globalSize;
             seperatedFields.Add(idx, chunk.field);
         }
 
@@ -43,13 +43,23 @@ public class PlanetHelper
 
         foreach(Chunk chunk in chunks)
         {
-            int idx = (int)chunk.pos.x + (int)chunk.pos.y * globalSize + (int)chunk.pos.z * globalSize * globalSize;
+            int idx = chunk.x + chunk.y * globalSize + chunk.z * globalSize * globalSize;
             float[] field = null;
 
             if (seperatedFields.TryGetValue(idx, out field))
                 if (field != null)
                     chunk.field = field;
 
+            bool hasValuesAboveBorder = false;
+            bool hasValuesBelowBorder = false;
+
+            for (int i = 0; i < chunk.field.Length; i++)
+                if (chunk.field[i] >= 0.5)
+                    hasValuesAboveBorder = true;
+                else
+                    hasValuesBelowBorder = true;
+
+            chunk.performTriangulation = (hasValuesAboveBorder && hasValuesBelowBorder);
         }
     }
 }
